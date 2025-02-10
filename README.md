@@ -29,12 +29,12 @@
 2. Open a terminal, navigate to the script directory, and run the following command:
 
 ```bash
-python3 script_name.py <YouTube links> [OPTIONS]
+python main.py <YouTube links> [OPTIONS]
 ```
 
 ### Example Usage:
 ```bash
-python3 script_name.py "https://www.youtube.com/watch?v=example_video" --mode all
+python main.py "https://www.youtube.com/watch?v=example_video" --mode all
 ```
 
 ---
