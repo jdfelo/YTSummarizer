@@ -136,7 +136,7 @@ def summarize_text(transcript):
     Focus on factual information and maintain a professional tone. List addresses in a structured format at the end."""
 
     completion = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"Create a structured summary of this police scanner transcript:\n\n{transcript}"}
