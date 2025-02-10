@@ -215,11 +215,45 @@ def process_video(model, link, output_dir, mode="all"):
         shutil.rmtree(temp_dir)
 
 
+def process_transcript_file(transcript_path, output_dir):
+    """
+    Process an existing transcript file and create a summary.
+    """
+    try:
+        # Read the transcript file
+        print(f"\nReading transcript file: {transcript_path}")
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            transcript = f.read()
+        
+        # Create base filename from input transcript name
+        base_name = os.path.splitext(os.path.basename(transcript_path))[0]
+        base_path = os.path.join(output_dir, base_name)
+        
+        # Generate summary
+        try:
+            summary = summarize_text(transcript)
+            # Save summary
+            summary_file = f"{base_path}_summary.txt"
+            save_transcript(summary, summary_file)
+        except Exception as e:
+            print(f"  [!] Error during summarization: {e}", file=sys.stderr)
+            return
+            
+    except Exception as e:
+        print(f"  [!] Error reading transcript file: {e}", file=sys.stderr)
+        return
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Transcribe one or more YouTube videos using Whisper (with CUDA support if available) and summarize with GPT-4."
+        description="Transcribe YouTube videos using Whisper and summarize with GPT-4. Can also summarize existing transcripts."
     )
-    parser.add_argument('links', nargs='+', help='One or more YouTube video links.')
+    # Make links optional since we might be processing a transcript file
+    parser.add_argument('links', nargs='*', help='YouTube video links to process.')
+    parser.add_argument(
+        '--transcript', type=str,
+        help='Path to an existing transcript file to summarize.'
+    )
     parser.add_argument(
         '--api-key', type=str,
         help='Your OpenAI API key (alternatively, set the OPENAI_API_KEY variable in your .env file).'
@@ -234,7 +268,16 @@ def main():
     )
     args = parser.parse_args()
 
-    # Set the OpenAI API key from command-line argument or environment variable.
+    # Validate arguments
+    if not args.links and not args.transcript:
+        print("Error: Please provide either YouTube links or a transcript file to process.", file=sys.stderr)
+        sys.exit(1)
+    
+    if args.transcript and args.mode != 'summarize':
+        print("Warning: When processing a transcript file, mode is automatically set to 'summarize'.")
+        args.mode = 'summarize'
+
+    # Set the OpenAI API key from command-line argument or environment variable
     if args.mode in ['summarize', 'all']:
         if args.api_key:
             client.api_key = args.api_key
@@ -245,6 +288,12 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
 
+    # If we're processing a transcript file, we don't need Whisper
+    if args.transcript:
+        process_transcript_file(args.transcript, args.output_dir)
+        return
+
+    # Process YouTube videos
     # Check CUDA availability and initialize device
     device = "cuda" if torch.cuda.is_available() else "cpu"
     if device == "cuda":

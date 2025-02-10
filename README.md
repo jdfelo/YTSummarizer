@@ -42,7 +42,8 @@ python main.py "https://www.youtube.com/watch?v=example_video" --mode all
 ### Command-Line Options:
 | **Argument**              | **Description**                                                                                   | **Default**      |
 |--------------------------|---------------------------------------------------------------------------------------------------|------------------|
-| `<YouTube links>`         | One or more YouTube links to process.                                                            | Required         |
+| `<YouTube links>`         | One or more YouTube links to process (optional if using --transcript).                           | None             |
+| `--transcript`            | Path to an existing transcript file to summarize.                                                | None             |
 | `--api-key`               | Your OpenAI API key (can be skipped if set in `.env`).                                           | None             |
 | `--mode`                  | Mode of operation: `transcribe`, `summarize`, or `all`.                                          | `all`            |
 | `--output-dir`            | Directory where output files (transcripts and summaries) will be saved.                         | `output`         |
@@ -51,8 +52,23 @@ python main.py "https://www.youtube.com/watch?v=example_video" --mode all
 
 ### Modes of Operation:
 - **transcribe**: Only transcribes the YouTube video using Whisper.
-- **summarize**: Summarizes a pre-transcribed video using GPT-4.
-- **all**: Transcribes the video and then generates a summary.
+- **summarize**: Summarizes either a pre-existing transcript file (when using --transcript) or a YouTube video.
+- **all**: Transcribes the video and then generates a summary (only for YouTube videos).
+
+### Example Usage:
+```bash
+# Process a YouTube video (transcribe and summarize)
+python main.py "https://www.youtube.com/watch?v=example_video" --mode all
+
+# Summarize an existing transcript file
+python main.py --transcript "path/to/transcript.txt"
+
+# Process multiple YouTube videos
+python main.py "video_url1" "video_url2" --mode all
+
+# Only transcribe a YouTube video
+python main.py "video_url" --mode transcribe
+```
 
 ---
 
