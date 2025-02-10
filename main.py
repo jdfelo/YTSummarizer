@@ -114,19 +114,35 @@ def transcribe_audio(model, audio_path):
 
 def summarize_text(transcript):
     """
-    Use GPT-4 via OpenAI's ChatCompletion API to summarize the transcript.
+    Use GPT-4 to create a structured summary of police scanner transcripts.
     """
-    print("  [*] Summarizing transcript with GPT-4...")
-    prompt = f"Summarize the following transcript in a concise and clear manner:\n\n{transcript}"
+    print("  [*] Creating structured summary with GPT-4...")
+    
+    system_prompt = """You are a police dispatch analyst who creates clear, structured summaries of police scanner transcripts. 
+    Organize the summary into these sections:
+    1. Key Moments Summary - List major incidents and their details
+    2. Suspicious Activity and Disturbances
+    3. Theft and Burglary Incidents
+    4. Juvenile and Welfare Checks
+    5. Vehicle-Related Incidents
+    6. Assault and Domestic Violence
+    7. Public Safety Threats
+    8. Firearms and Arrests
+    9. Routine Reports and Cleanup Efforts
+    10. Coordinated Responses and Emergency Services
+    11. Key Locations - List all addresses mentioned with their associated incidents
+    
+    Format each section clearly with headers. Include specific details like addresses, descriptions, and outcomes when available.
+    Focus on factual information and maintain a professional tone. List addresses in a structured format at the end."""
 
     completion = client.chat.completions.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that summarizes transcripts."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Create a structured summary of this police scanner transcript:\n\n{transcript}"}
         ],
         temperature=0.3,
-        max_tokens=300
+        max_tokens=2000  # Increased token limit for detailed summaries
     )
     
     summary = completion.choices[0].message.content.strip()
